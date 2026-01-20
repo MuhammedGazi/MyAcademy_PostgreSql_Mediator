@@ -1,3 +1,3 @@
 ﻿namespace MyAcademyMediatorProject.MediatorPattern.Results.CategoryResults;
 
-public class GetCategoriesByIdQueryResult(Guid Id, string Name);
+public record GetCategoriesByIdQueryResult(Guid Id, string Name);

@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using MyAcademyMediatorProject.Context;
+using System.Linq.Expressions;
 
 namespace MyAcademyMediatorProject.Repositories
 {
@@ -22,6 +23,17 @@ namespace MyAcademyMediatorProject.Repositories
         public async Task<List<Tentity>> GetAllAsync()
         {
             return await _context.Set<Tentity>().AsNoTracking().ToListAsync();
+        }
+
+        public async Task<List<Tentity>> GetAllAsync(params Expression<Func<Tentity, object>>[] includes)
+        {
+            var query=_context.Set<Tentity>();
+            foreach (var include in includes)
+            {
+                query.Include(include);
+            }
+
+            return await query.AsNoTracking().ToListAsync();
         }
 
         public async Task<Tentity> GetByIdAsync(Guid id)
