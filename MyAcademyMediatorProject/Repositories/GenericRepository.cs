@@ -27,10 +27,10 @@ namespace MyAcademyMediatorProject.Repositories
 
         public async Task<List<Tentity>> GetAllAsync(params Expression<Func<Tentity, object>>[] includes)
         {
-            var query=_context.Set<Tentity>();
+            var query = _context.Set<Tentity>().AsQueryable();
             foreach (var include in includes)
             {
-                query.Include(include);
+                query = query.Include(include);
             }
 
             return await query.AsNoTracking().ToListAsync();

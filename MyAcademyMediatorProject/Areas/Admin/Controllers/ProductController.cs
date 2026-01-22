@@ -1,13 +1,63 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using MyAcademyMediatorProject.MediatorPattern.Commands.ProductCommands;
+using MyAcademyMediatorProject.MediatorPattern.Queries.CategoryQueries;
+using MyAcademyMediatorProject.MediatorPattern.Queries.ProductQueries;
 
 namespace MyAcademyMediatorProject.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class ProductController : Controller
+    public class ProductController(IMediator _mediator) : Controller
     {
-        public IActionResult Index()
+        private async Task GetCategoryAsync()
         {
+            var categories = await _mediator.Send(new GetCategoriesQuery());
+            ViewBag.categories = (from category in categories
+                                  select new SelectListItem
+                                  {
+                                      Text = category.Name,
+                                      Value = category.Id.ToString()
+                                  }).ToList();
+        }
+        public async Task<IActionResult> Index()
+        {
+            var products = await _mediator.Send(new GetProductsQuery());
+            return View(products);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateProduct()
+        {
+            await GetCategoryAsync();
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct(CreateProductCommand command)
+        {
+            await _mediator.Send(command);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UpdateProduct(Guid id)
+        {
+            await GetCategoryAsync();
+            var product = await _mediator.Send(new GetProductByIdQuery(id));
+            return View(product);
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdateProduct(UpdateProductCommand command)
+        {
+            await _mediator.Send(command);
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> DeleteProduct(Guid id)
+        {
+            await _mediator.Send(new DeleteProductCommand(id));
+            return RedirectToAction(nameof(Index));
         }
     }
 }
